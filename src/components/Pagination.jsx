@@ -42,7 +42,7 @@ const Pagination = ({
         <button
           onClick={handleNextBtn}
           disabled={!next}
-          className="flex items-center justify-center size-10 text-sm font-medium text-white bg-gray-300 border-0 border-s border-gray-400 rounded-e hover:bg-gray-400 dark:bg-blue-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-blue-700 dark:hover:text-white disabled:opacity-50 disabled:pointer-events-none"
+          className="flex items-center justify-center size-10 text-sm font-medium text-white bg-gray-300 border-0 border-s border-gray-300 rounded-e hover:bg-gray-400 dark:bg-blue-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-blue-700 dark:hover:text-white disabled:opacity-50 disabled:pointer-events-none"
         >
           <HiArrowRight />
         </button>

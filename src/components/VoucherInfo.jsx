@@ -14,24 +14,39 @@ const VoucherInfo = () => {
 
   const total = records.reduce((a, b) => a + b.cost, 0);
   const tax = total * 0.07;
-  const netTotal = total + tax;
+  const net_total = total + tax;
   const handleInfo = async (data) => {
     setIsSending(true);
-    const currentVoucher = { ...data, records, total, tax, netTotal };
+    const currentVoucher = { ...data, records, total, tax, net_total };
+
+    console.log(currentVoucher);
     const res = await fetch(import.meta.env.VITE_API_URL + "/vouchers", {
       method: "POST",
+      body: JSON.stringify(currentVoucher),
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
-      body: JSON.stringify(currentVoucher),
     });
+    console.log(res);
+
     const json = await res.json();
-    toast.success("Voucher Created Successfully");
-    setIsSending(false);
-    resetRecords();
-    reset();
-    if (data.redirect_to_detail) {
-      navigate(`/voucher/detail/${json.id}`);
+    console.log(json);
+
+    if (res.status === 201) {
+      toast.success("Voucher created successfully");
+
+      resetRecords();
+
+      reset();
+
+      setIsSending(false);
+
+      if (data.redirect_to_detail) {
+        navigate(`/voucher/detail/${json.id}`);
+      }
+    } else {
+      toast.error(json.message);
     }
   };
   const {
@@ -66,7 +81,11 @@ const VoucherInfo = () => {
         <VoucherTable />
       </div>
       <div className=" col-span-1">
-        <form onSubmit={handleSubmit(handleInfo)} className=" flex flex-col h-full" id="infoForm">
+        <form
+          onSubmit={handleSubmit(handleInfo)}
+          className=" flex flex-col h-full"
+          id="infoForm"
+        >
           <div className=" grid grid-cols-1 gap-5 mb-10">
             <div className=" mb-3">
               <label
@@ -231,60 +250,57 @@ const VoucherInfo = () => {
           </div>
 
           <div className=" flex flex-col justify-end items-end  mt-auto gap-3">
-          <div className="flex items-center">
-            <label
-              htmlFor="redirect_to_detail"
-              className="me-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-            >
-              Redirect to Voucher Detail
-            </label>
-            <input
-              {...register("redirect_to_detail")}
-              form="infoForm"
-              id="redirect_to_detail"
-              type="checkbox"
-              value=""
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-            />
-          </div>
-          <div className="flex items-center">
-            <label
-              htmlFor="all-correct"
-              className="me-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-            >
-              Make sure all field are correct
-            </label>
-            <input
-              {...register("all_correct")}
-              required
-              form="infoForm"
-              id="all-correct"
-              type="checkbox"
-              value=""
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-            />
-          </div>
+            <div className="flex items-center">
+              <label
+                htmlFor="redirect_to_detail"
+                className="me-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+              >
+                Redirect to Voucher Detail
+              </label>
+              <input
+                {...register("redirect_to_detail")}
+                form="infoForm"
+                id="redirect_to_detail"
+                type="checkbox"
+                value=""
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+            </div>
+            <div className="flex items-center">
+              <label
+                htmlFor="all-correct"
+                className="me-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+              >
+                Make sure all field are correct
+              </label>
+              <input
+                {...register("all_correct")}
+                required
+                form="infoForm"
+                id="all-correct"
+                type="checkbox"
+                value=""
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+            </div>
 
-          <button
-            type="submit"
-            form="infoForm"
-            className="text-white bg-blue-700 inline-flex gap-3 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
-            <span>Confirm Voucher</span>
-            {isSending && (
-              <l-dot-Spinner
-                size="20"
-                stroke="5"
-                speed="0.9"
-                color="white"
-              ></l-dot-Spinner>
-            )}
-          </button>
-        </div>
+            <button
+              type="submit"
+              form="infoForm"
+              className="text-white bg-blue-700 inline-flex gap-3 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-3 py-3 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              <span>Confirm Voucher</span>
+              {isSending && (
+                <l-dot-Spinner
+                  size="20"
+                  stroke="5"
+                  speed="0.9"
+                  color="white"
+                ></l-dot-Spinner>
+              )}
+            </button>
+          </div>
         </form>
-
-
-        
       </div>
     </div>
   );

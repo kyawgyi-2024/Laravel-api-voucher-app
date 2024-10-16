@@ -1,11 +1,12 @@
 import React, { useRef, useState } from "react";
-import { HiOutlineSearch,HiX } from "react-icons/hi";
+import { HiOutlineSearch, HiX } from "react-icons/hi";
 import { HiComputerDesktop } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 import useSWR from "swr";
 import VoucherListRow from "./VoucherListRow";
 import VLRSkeletonloader from "./VLRSkeletonloader";
 import { debounce, throttle } from "lodash";
+import Pagination from "./Pagination";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -16,19 +17,21 @@ const VoucherList = () => {
 
   const searchInput = useRef("");
 
+  const [fetchUrl, setFetchUrl] = useState(
+    import.meta.env.VITE_API_URL + "/vouchers"
+  );
+
   // console.log(searchInput);
 
   // const handlesearch = (e) => {
   //   // console.log(e.target.value)
   //   setSearch(e.target.value);
   // };
-  const { data, isLoading, error } = useSWR(
-    search
-      ? `${import.meta.env.VITE_API_URL}/vouchers?voucher_id_like=${search}`
-      : `${import.meta.env.VITE_API_URL}/vouchers`,
-    fetcher
-  );
-   // throttling 500 & debouncing - 500
+  const { data, isLoading, error } = useSWR(fetchUrl, fetcher);
+
+  // if(isLoading) return <VLRSkeletonloader/>
+  // console.log(data);
+  // throttling 500 & debouncing - 500
 
   // const handleSearch = (e) => {
   //   // setSearch(e.target.value);
@@ -40,13 +43,17 @@ const VoucherList = () => {
 
   const handleSearch = debounce((e) => {
     console.log(e.target.value);
-    setSearch(e.target.value);
+    setFetchUrl(import.meta.env.VITE_API_URL + `/vouchers?q=${e.target.value}`);
   }, 500);
-  
+
   const handleClearSearch = () => {
     setSearch("");
     searchInput.current.value = "";
-  }
+  };
+
+  const updateFetchUrl = (url) => {
+    setFetchUrl(url);
+  };
 
   return (
     <div>
@@ -56,16 +63,22 @@ const VoucherList = () => {
             <HiOutlineSearch className=" w-4 h-4 text-gray-500" />
           </div>
           <input
-            ref={searchInput}
             onChange={handleSearch}
             type="text"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="Search Voucher ... "
           />
-          {search && <button className=" absolute top-0 right-2 bottom-0 m-auto" onClick={handleClearSearch}><HiX
-                  fill="red"
-                  className="scale-100 active:scale-90 duration-200"
-                /></button>}
+          {search && (
+            <button
+              className=" absolute top-0 right-2 bottom-0 m-auto"
+              onClick={handleClearSearch}
+            >
+              <HiX
+                fill="red"
+                className="scale-100 active:scale-90 duration-200"
+              />
+            </button>
+          )}
         </div>
 
         <div>
@@ -112,13 +125,20 @@ const VoucherList = () => {
             {isLoading ? (
               <VLRSkeletonloader />
             ) : (
-              data?.map((voucher, index) => (
+              data?.data?.map((voucher, index) => (
                 <VoucherListRow key={index} voucher={voucher} />
               ))
             )}
           </tbody>
         </table>
       </div>
+      {!isLoading && (
+        <Pagination
+          link={data?.links}
+          meta={data?.meta}
+          updateFetchUrl={updateFetchUrl}
+        />
+      )}
     </div>
   );
 };
